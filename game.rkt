@@ -8,30 +8,35 @@
 (define frame-time (/ 1000 fps))
 
 (define render (lambda (canvas dc)
+	(printf "In render\n")
 	(send dc set-scale 2 2)
 	(send dc set-text-foreground "red")
 	(send dc draw-text "Racket Snake" 0 0)))
 
 ; Main game loop
-(define (game-loop last-time)
+(define (game-loop)
 	; Get time for start of this loop iteration
-	(define current-time (current-seconds))
-	; Determine amount of time since last iteration
-	(define elapsed-time (- current-time last-time)
-	; Compare time
-	(cond 
-		; Case 1: There is extra time left (before the frame is up)
-		[(< elapsed-time frame-time) 
-			; In this case, we can execute the game logic
-			(game-logic)
-			(sleep (- frame-time elapsed-time))]
-		[else (game)])
-	; And wait appropriate amount
-	(game-loop current-time))
+	(define start-time (current-inexact-milliseconds))
+	
+	; Update, render
+	(update-game)
+	(printf "Executed game logic\n")
+	; Determine amount of time passed
+	(define elapsed-time (- start-time (current-inexact-milliseconds)))
+	; Sleep if time left
+	(define sleep-time (/ (- frame-time elapsed-time ) 1000))
+	(printf "Sleep time: ~v" sleep-time)
+	(cond [(> sleep-time 0)
+		(printf "About to sleep ~v" sleep-time)
+		(sleep sleep-time)
+		(printf "Slept for ~v" sleep-time)])
+	; Loop game
+	(cond
+		[running? (game-loop)]))
 
 ; Game logic: Update snake and food
-(define (game-logic)
-	printf("Executing game logic\n"))
+(define (update-game)
+	(printf "Executing game logic\n"))
 
 
 ; GUI:
@@ -57,6 +62,9 @@
 (define my-canvas (new custom-canvas
 	[parent frame]
 	[paint-callback render]))
-
 ; Show the frame
 (send frame show #t)
+
+
+; Start the game loop
+(game-loop)
