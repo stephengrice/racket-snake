@@ -7,39 +7,20 @@
 (define fps 60)
 (define frame-time (/ 1000 fps))
 
-(define render (lambda (canvas dc)
-	(printf "In render\n")
+(define test-value 0)
+
+(define render (lambda (dc)
+	(send dc clear)
 	(send dc set-scale 2 2)
 	(send dc set-text-foreground "red")
-	(send dc draw-text "Racket Snake" 0 0)))
+	(send dc draw-text "Racket Snake" 0 0)
+	(send dc draw-text "Hey" test-value 0)))
 
-; Main game loop
-(define (game-loop)
-	; Get time for start of this loop iteration
-	(define start-time (current-inexact-milliseconds))
-	
-	; Update, render
-	(update-game)
-	(printf "Executed game logic\n")
-	; Determine amount of time passed
-	(define elapsed-time (- start-time (current-inexact-milliseconds)))
-	; Sleep if time left
-	(define sleep-time (/ (- frame-time elapsed-time ) 1000))
-	(printf "Sleep time: ~v" sleep-time)
-	(cond [(> sleep-time 0)
-		(printf "About to sleep ~v" sleep-time)
-		(sleep sleep-time)
-		(printf "Slept for ~v" sleep-time)])
-	; Loop game
-	(cond
-		[running? (game-loop)]))
 
 ; Game logic: Update snake and food
 (define (update-game)
-	(printf "Executing game logic\n"))
+	(if (> test-value 600) (set! test-value 0) (set! test-value (+ test-value 1))))
 
-
-; GUI:
 ; Define frame
 (define frame
 	(new frame% 
@@ -61,10 +42,33 @@
 ; Create instance of custom canvas with paint-callback
 (define my-canvas (new custom-canvas
 	[parent frame]
-	[paint-callback render]))
+	[paint-callback (lambda (canvas dc)
+		(render dc))]))
+
+(define dc (send my-canvas get-dc))
+
+
+; Main game loop
+(define game-thread (thread (lambda ()
+	(let loop ()
+		; Get time for start of this loop iteration
+		(define start-time (current-inexact-milliseconds))
+	
+		; Update, render
+		(update-game)
+		(render dc)
+	
+		; Determine amount of time passed
+		(define elapsed-time (- start-time (current-inexact-milliseconds)))
+		; Sleep if time left
+		(define sleep-time (/ (- frame-time elapsed-time ) 1000))
+		(cond [(> sleep-time 0)
+			(sleep sleep-time)
+			(printf "Slept for ~v~n" sleep-time)])
+		; Loop game
+		(cond
+			[running? (loop)])))))
+
+
 ; Show the frame
 (send frame show #t)
-
-
-; Start the game loop
-(game-loop)
