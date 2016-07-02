@@ -3,19 +3,27 @@
 	racket/gui
 	racket/draw)
 
+; Variable declarations
 (define running? #t)
 (define fps 60)
 (define frame-time (/ 1000 fps))
-
+(define square-size 10)
+; Temporary variable
 (define test-value 0)
 
+; Helper functions for grid system
+(define draw-square (lambda (x y dc)
+	(send dc draw-rectangle (* x square-size) (* y square-size) square-size square-size)))
+
+; Render: All drawing code
 (define render (lambda (dc)
 	(send dc clear)
 	(send dc set-scale 2 2)
 	(send dc set-text-foreground "red")
 	(send dc draw-text "Racket Snake" 0 0)
-	(send dc draw-text "Hey" test-value 0)))
-
+	(send dc draw-text "Hey" test-value 0)
+	(draw-square 1 1 dc)
+	(draw-square 3 4 dc)))
 
 ; Game logic: Update snake and food
 (define (update-game)
