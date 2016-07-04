@@ -7,18 +7,21 @@
 
 ; Variable declarations
 (define running? #t)
+(define debug? #f)
 (define fps 60)
 (define frame-time (/ 1000 fps))
+(define snake (new snake% [body-arg (list (cons 0 0))]))
+(define direction 'right)
 
 (define render (lambda (dc)
 	(send dc clear)
 	(send dc set-scale 2 2)
-	(define sn (new snake% [body-arg empty]))
-	(send sn draw dc)))
+	(send snake draw dc)))
 
 ; Game logic: Update snake and food
 (define (update-game)
-	0)
+	(and debug? (printf "updated game\n"))
+	(send snake move direction))
 ; Define frame
 (define frame
 	(new frame% 
@@ -62,7 +65,7 @@
 		(define sleep-time (/ (- frame-time elapsed-time ) 1000))
 		(cond [(> sleep-time 0)
 			(sleep sleep-time)
-			(printf "Slept for ~v~n" sleep-time)])
+			(and debug? (printf "Slept for ~v~n" sleep-time))])
 		; Loop game
 		(cond
 			[running? (loop)])))))
