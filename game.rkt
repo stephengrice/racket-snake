@@ -7,41 +7,57 @@
 (define running? #t)
 (define fps 60)
 (define frame-time (/ 1000 fps))
-(define square-size 10)
-; Temporary variable
-(define test-value 0)
+(define square-size 5)
+(define window-size (cons 600 400))
+
+; Snake class
+(define snake% (class object%
+	(init body-arg)
+	; Initialize body as provided list or random spot
+	(define body
+		(cond
+		[(empty? body-arg) (list (random-square))]
+		[else body-arg]))
+	(super-new)
+	(define/public (draw dc)
+		(map (lambda (elem)
+			(draw-square (car elem) (cdr elem) dc))
+			body))))
 
 ; Helper functions for grid system
-(define draw-square (lambda (x y dc)
-	(send dc draw-rectangle (* x square-size) (* y square-size) square-size square-size)))
+	; Draw-square: Draws square in grid system
+(define (draw-square x y dc)
+	(send dc draw-rectangle (* x square-size) (* y square-size) square-size square-size))
+	; random-square: gets random square in grid
+(define (random-square)
+	(cons (random 1 (car (grid-max)) (current-pseudo-random-generator)) (random 1 (cdr (grid-max)) (current-pseudo-random-generator))))
+	; grid-max: returns a pair containing the max x and y values that are onscreen in grid system
+(define (grid-max)
+	(cons (floor (/ (car window-size) square-size)) (floor (/ (cdr window-size) square-size))))
 
 ; Render: All drawing code
 (define render (lambda (dc)
 	(send dc clear)
 	(send dc set-scale 2 2)
-	(send dc set-text-foreground "red")
-	(send dc draw-text "Racket Snake" 0 0)
-	(send dc draw-text "Hey" test-value 0)
-	(draw-square 1 1 dc)
-	(draw-square 3 4 dc)))
+	(define sn (new snake% [body-arg empty]))
+	(send sn draw dc)))
 
 ; Game logic: Update snake and food
 (define (update-game)
-	(if (> test-value 600) (set! test-value 0) (set! test-value (+ test-value 1))))
-
+	0)
 ; Define frame
 (define frame
 	(new frame% 
 		[label "Racket Snake"]
-		[min-width 600]
-		[min-height 400]))
+		[min-width (car window-size)]
+		[min-height (cdr window-size)]))
 
 ; Define custom canvas to handle input
 (define custom-canvas 
 	(class canvas%
 		; Overrided method for mouse input
-		(define/override (on-event event)
-			(printf "Mouse input detected\n"))
+		;(define/override (on-event event)
+		;	(printf "Mouse input detected\n"))
 		; Overrided method for keyboard input
 		(define/override (on-char event)
 			(printf "Keyboard input detected\n"))
