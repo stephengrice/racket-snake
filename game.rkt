@@ -2,14 +2,13 @@
 (require 
 	racket/gui
 	racket/draw
+	"config.rkt"
 	"snake.rkt")
 
 ; Variable declarations
 (define running? #t)
 (define fps 60)
 (define frame-time (/ 1000 fps))
-(define square-size 5)
-(define window-size (cons 600 400))
 
 (define render (lambda (dc)
 	(send dc clear)
