@@ -7,8 +7,7 @@
 
 ; Variable declarations
 (define running? #t)
-(define debug? #f)
-(define fps 60)
+(define fps 20)
 (define frame-time (/ 1000 fps))
 (define snake (new snake% [body-arg (list (cons 0 0))]))
 (define direction 'right)
@@ -37,7 +36,12 @@
 		;	(printf "Mouse input detected\n"))
 		; Overrided method for keyboard input
 		(define/override (on-char event)
-			(printf "Keyboard input detected\n"))
+			(define code (send event get-key-code))
+			(cond 
+				[(eq? code 'left) (set! direction 'left)]
+				[(eq? code 'right) (set! direction 'right)]
+				[(eq? code 'up) (set! direction 'up)]
+				[(eq? code 'down) (set! direction 'down)]))
 		(super-new)))
 
 ; Create instance of custom canvas with paint-callback

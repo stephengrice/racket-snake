@@ -27,19 +27,20 @@
 		(cond
 			[(eq? direction 'right)
 				; new-head.x += 1
-				(set! new-head (cons (+ 1 (car new-head)) (cdr new-head)))]
+				(set! new-head (cons (+ (car new-head) 1) (cdr new-head)))]
 			
 			[(eq? direction 'left)
 				; new-head.x -= 1
-				(set! new-head (cons (- 1 (car new-head)) (cdr new-head)))]
+				(set! new-head (cons (- (car new-head) 1) (cdr new-head)))]
 
 			[(eq? direction 'up)
 				; new-head.y -= 1
-				(set! new-head (cons (car new-head) (- 1 (cdr new-head))))]
+				(set! new-head (cons (car new-head) (- (cdr new-head) 1)))]
 
 			[(eq? direction 'down)
 				; new-head.y += 1
-				(set! new-head (cons (car new-head) (+ 1 (cdr new-head))))])
+				(set! new-head (cons (car new-head) (+ (cdr new-head) 1)))])
+		(and debug? (printf "Head: ~v, ~v\n" (car (car body)) (cdr (car body))))
 		(set! body (cons new-head body))
 		; 2. Remove tail
 		(set! body (remove-tail body)))))
