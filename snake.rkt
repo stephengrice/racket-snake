@@ -12,10 +12,14 @@
 	; Body is a list of each of the snake's squares, denoted as '(x y) where x and y are the coordinates within grid system
 	(define body
 		(cond
-		[(empty? body-arg) (list (random-square))]
+		[(empty? body-arg) 
+			;(define temp (random-square))
+			(list (random-square))];(list (temp) (square-left temp) (square-left (square-left temp)))]
 		[else body-arg]))
 	(super-new)
 	(define/public (draw dc)
+		(send dc set-pen "Black" 0 'transparent)
+		(send dc set-brush "Dark Green" 'solid)
 		(map (lambda (elem)
 			(draw-square (car elem) (cdr elem) dc))
 			body))
@@ -61,3 +65,15 @@
 		[(empty? l) (error "remove-tail: list cannot be empty")]
 		[(empty? (cdr l)) empty]
 		[else (cons (car l) (remove-tail (cdr l)))]))
+; Helper functions for relative square locations
+(define (square-above square)
+	(cons (car square) (- (cdr square) 1)))
+
+(define (square-below square)
+	(cons (car square) (+ (cdr square) 1)))
+
+(define (square-left square)
+	(cons (- (car square) 1) (cdr square)))
+
+(define (square-right square)
+	(cons (+ (car square) 1) (cdr square)))

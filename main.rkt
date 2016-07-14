@@ -9,7 +9,7 @@
 (define running? #t)
 (define fps 20)
 (define frame-time (/ 1000 fps))
-(define snake (new snake% [body-arg (list (cons 0 0))]))
+(define snake (new snake% [body-arg empty]))
 (define direction 'right)
 
 (define render (lambda (dc)
