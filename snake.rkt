@@ -22,6 +22,8 @@
 			body))
 	(define/public (get-body)
 		body)
+	(define/public (get-head)
+		(car body))
 	(define/public (set-direction val)
 		(set! direction val))
 	(define/public (move)
@@ -32,23 +34,16 @@
 		(set! body (remove-tail body)))
 	(define/public (grow)
 		; Add one more square to the snake according to direction
-		(define new-head (car body))	
+		(define new-head (get-head))	
 		(cond
 			[(eq? direction 'right)
-				; new-head.x += 1
-				(set! new-head (cons (+ (car new-head) 1) (cdr new-head)))]
-			
+				(set! new-head (square-right new-head))]
 			[(eq? direction 'left)
-				; new-head.x -= 1
-				(set! new-head (cons (- (car new-head) 1) (cdr new-head)))]
-
+				(set! new-head (square-left new-head))]
 			[(eq? direction 'up)
-				; new-head.y -= 1
-				(set! new-head (cons (car new-head) (- (cdr new-head) 1)))]
-
+				(set! new-head (square-above new-head))]
 			[(eq? direction 'down)
-				; new-head.y += 1
-				(set! new-head (cons (car new-head) (+ (cdr new-head) 1)))])	
+				(set! new-head (square-below new-head))])	
 		(set! body (cons new-head body)))))
 
 ; Helper functions for grid system
