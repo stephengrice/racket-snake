@@ -14,6 +14,7 @@
 		(cond
 		[(empty? body-arg) (list (random-square))]
 		[else body-arg]))
+	(define direction 'right)
 	(super-new)
 	(define/public (draw dc)
 		(map (lambda (elem)
@@ -21,8 +22,16 @@
 			body))
 	(define/public (get-body)
 		body)
-	(define/public (move direction)
+	(define/public (set-direction val)
+		(set! direction val))
+	(define/public (move)
 		; 1. Add new head in proper direction
+		(grow)
+		(and debug? (printf "Head: ~v, ~v\n" (car (car body)) (cdr (car body))))
+		; 2. Remove tail (unless instructed to grow during this step)
+		(set! body (remove-tail body)))
+	(define/public (grow)
+		; Add one more square to the snake according to direction
 		(define new-head (car body))	
 		(cond
 			[(eq? direction 'right)
@@ -39,11 +48,8 @@
 
 			[(eq? direction 'down)
 				; new-head.y += 1
-				(set! new-head (cons (car new-head) (+ (cdr new-head) 1)))])
-		(and debug? (printf "Head: ~v, ~v\n" (car (car body)) (cdr (car body))))
-		(set! body (cons new-head body))
-		; 2. Remove tail
-		(set! body (remove-tail body)))))
+				(set! new-head (cons (car new-head) (+ (cdr new-head) 1)))])	
+		(set! body (cons new-head body)))))
 
 ; Helper functions for grid system
 	; Draw-square: Draws square in grid system
@@ -61,3 +67,15 @@
 		[(empty? l) (error "remove-tail: list cannot be empty")]
 		[(empty? (cdr l)) empty]
 		[else (cons (car l) (remove-tail (cdr l)))]))
+; Helper functions for relative square locations
+(define (square-above square)
+	(cons (car square) (- (cdr square) 1)))
+
+(define (square-below square)
+	(cons (car square) (+ (cdr square) 1)))
+
+(define (square-left square)
+	(cons (- (car square) 1) (cdr square)))
+
+(define (square-right square)
+	(cons (+ (car square) 1) (cdr square)))
