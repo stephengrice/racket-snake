@@ -3,7 +3,9 @@
 (require
 	"config.rkt")
 
-(provide snake%)
+(provide 
+	snake%
+	food%)
 
 ; Snake class
 (define snake% (class object%
@@ -17,8 +19,10 @@
 	(define direction 'right)
 	(super-new)
 	(define/public (draw dc)
+		(send dc set-pen "Black" 0 'transparent)
+		(send dc set-brush "Dark Green" 'solid)
 		(map (lambda (elem)
-			(draw-square (car elem) (cdr elem) dc))
+			(draw-square elem dc))
 			body))
 	(define/public (get-body)
 		body)
@@ -46,10 +50,20 @@
 				(set! new-head (square-below new-head))])	
 		(set! body (cons new-head body)))))
 
+; Food class
+(define food% (class object%
+	(define body (random-square))
+	(super-new)
+	(define/public (draw dc)
+		(send dc set-brush "Green" 'solid)
+		(draw-square body dc))))
+
 ; Helper functions for grid system
 	; Draw-square: Draws square in grid system
-(define (draw-square x y dc)
-	(send dc draw-rectangle (* x square-size) (* y square-size) square-size square-size))
+(define (draw-square position dc)
+	(let ([x (car position)]
+		[y (cdr position)])
+		(send dc draw-rectangle (* x square-size) (* y square-size) square-size square-size)))
 	; random-square: gets random square in grid
 (define (random-square)
 	(cons (random (+ 1 (car (grid-max)))) (random (cdr (grid-max)))))

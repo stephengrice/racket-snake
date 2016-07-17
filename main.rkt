@@ -10,11 +10,13 @@
 (define fps 20)
 (define frame-time (/ 1000 fps))
 (define snake (new snake% [body-arg (list (cons 0 0))]))
+(define food (new food%))
 
 (define render (lambda (dc)
 	(send dc clear)
 	(send dc set-scale 2 2)
-	(send snake draw dc)))
+	(send snake draw dc)
+	(send food draw dc)))
 
 ; Game logic: Update snake and food
 (define (update-game)
