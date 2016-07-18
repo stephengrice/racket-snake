@@ -80,7 +80,11 @@
 	(cons (random (+ 1 (car (grid-max)))) (random (cdr (grid-max)))))
 	; grid-max: returns a pair containing the max x and y values that are onscreen in grid system
 (define (grid-max)
-	(cons (floor (/ (car window-size) square-size)) (floor (/ (cdr window-size) square-size))))
+	(define pix-width (car window-size))
+	(define pix-height (cdr window-size))
+	(define dc-width (/ pix-width default-scale))
+	(define dc-height (/ pix-height default-scale))
+	(cons (- (/ dc-width square-size) 1) (- (/ dc-height square-size) 1)))
 	; remove-tail: Remove tail from l and return result
 (define (remove-tail l)
 	(cond
