@@ -30,10 +30,19 @@
 		(car body))
 	(define/public (set-direction val)
 		(set! direction val))
+	(define/public (collides? pair)
+		(define result #f)
+		; Check each body element to see if collides with given pair
+		(for ([i body])
+			#:break (equal? result #t)
+			(when (equal? pair (get-head))
+				(set! result #t)))
+		; Return the resulting boolean
+		result)
 	(define/public (move)
 		; 1. Add new head in proper direction
 		(grow)
-		(and debug? (printf "Head: ~v, ~v\n" (car (car body)) (cdr (car body))))
+		(and debug? (printf "Moved head: ~v, ~v\n" (car (car body)) (cdr (car body))))
 		; 2. Remove tail (unless instructed to grow during this step)
 		(set! body (remove-tail body)))
 	(define/public (grow)
@@ -56,7 +65,9 @@
 	(super-new)
 	(define/public (draw dc)
 		(send dc set-brush "Green" 'solid)
-		(draw-square body dc))))
+		(draw-square body dc))
+	(define/public (get-body)
+		body)))
 
 ; Helper functions for grid system
 	; Draw-square: Draws square in grid system

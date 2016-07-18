@@ -21,7 +21,10 @@
 ; Game logic: Update snake and food
 (define (update-game)
 	(and debug? (printf "updated game\n"))
-	(send snake move))
+	(send snake move)
+	(and debug? (printf "Food: ~v\n" (send food get-body)))
+	(when (send snake collides? (send food get-body))
+		(send snake grow)))
 ; Define frame
 (define frame
 	(new frame% 
