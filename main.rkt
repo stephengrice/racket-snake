@@ -11,20 +11,28 @@
 (define frame-time (/ 1000 fps))
 (define snake (new snake% [body-arg (list (cons 0 0))]))
 (define food (new food%))
+(define score 0)
 
 (define render (lambda (dc)
 	(send dc clear)
 	(send dc set-scale 2 2)
 	(send snake draw dc)
-	(send food draw dc)))
+	(send food draw dc)
+	(draw-score dc)))
+
+(define (draw-score dc)
+	(define str-score (string-append "Score: " (number->string score)))
+	(send dc draw-text str-score 20 20))
 
 ; Game logic: Update snake and food
 (define (update-game)
-	(and debug? (printf "updated game\n"))
 	(send snake move)
 	(and debug? (printf "Food: ~v\n" (send food get-body)))
+	(and debug? (printf "Score: ~v\n" score))
 	(when (send snake collides? (send food get-body))
-		(send snake grow)))
+		(send snake grow)
+		(send food move)
+		(set! score (+ score 1))))
 ; Define frame
 (define frame
 	(new frame% 

@@ -67,7 +67,9 @@
 		(send dc set-brush "Green" 'solid)
 		(draw-square body dc))
 	(define/public (get-body)
-		body)))
+		body)
+	(define/public (move)
+		(set! body (random-square)))))
 
 ; Helper functions for grid system
 	; Draw-square: Draws square in grid system
