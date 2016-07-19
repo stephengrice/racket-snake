@@ -34,8 +34,8 @@
 		(define offscreen? (not (onscreen? (get-head))))
 		; If head is colliding with some other part of the body, dying is true
 		(define overlap? (collides? (cdr body) (get-head)))
-		(printf "offscreen?: ~v~n" offscreen?)
-		(printf "overlap?: ~v~n" overlap?)
+		(and debug? (printf "offscreen?: ~v~n" offscreen?))
+		(and debug? (printf "overlap?: ~v~n" overlap?))
 		(or offscreen? overlap?))
 	(define/public (eating? food-location)
 		(collides? body food-location))

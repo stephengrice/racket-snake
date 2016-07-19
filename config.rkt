@@ -8,5 +8,5 @@
 
 (define square-size 5)
 (define window-size (cons 600 400))
-(define debug? #t)
+(define debug? #f)
 (define default-scale 2)
