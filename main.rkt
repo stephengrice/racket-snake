@@ -18,7 +18,9 @@
 	(send dc set-scale 2 2)
 	(send snake draw dc)
 	(send food draw dc)
-	(draw-score dc)))
+	(draw-score dc)
+	(when (not running?)
+		(send dc draw-text "Game Over" 20 40))))
 
 (define (draw-score dc)
 	(define str-score (string-append "Score: " (number->string score)))
@@ -29,10 +31,17 @@
 	(send snake move)
 	(and debug? (printf "Food: ~v\n" (send food get-body)))
 	(and debug? (printf "Score: ~v\n" score))
-	(when (send snake collides? (send food get-body))
+	(when (send snake eating? (send food get-body))
 		(send snake grow)
 		(send food move)
-		(set! score (+ score 1))))
+		(set! score (+ score 1)))
+	(when (send snake dying?)
+		(game-over)))
+
+; game-over: end the game
+(define (game-over)
+	(set! running? #f))
+
 ; Define frame
 (define frame
 	(new frame% 

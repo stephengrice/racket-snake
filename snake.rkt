@@ -30,15 +30,15 @@
 		(car body))
 	(define/public (set-direction val)
 		(set! direction val))
-	(define/public (collides? pair)
-		(define result #f)
-		; Check each body element to see if collides with given pair
-		(for ([i body])
-			#:break (equal? result #t)
-			(when (equal? pair (get-head))
-				(set! result #t)))
-		; Return the resulting boolean
-		result)
+	(define/public (dying?)
+		(define offscreen? (not (onscreen? (get-head))))
+		; If head is colliding with some other part of the body, dying is true
+		(define overlap? (collides? (cdr body) (get-head)))
+		(printf "offscreen?: ~v~n" offscreen?)
+		(printf "overlap?: ~v~n" overlap?)
+		(or offscreen? overlap?))
+	(define/public (eating? food-location)
+		(collides? body food-location))
 	(define/public (move)
 		; 1. Add new head in proper direction
 		(grow)
@@ -77,6 +77,16 @@
 	(let ([x (car position)]
 		[y (cdr position)])
 		(send dc draw-rectangle (* x square-size) (* y square-size) square-size square-size)))
+	; collides? Check if `list` has any collisions with `point` (check if list contains the point)
+(define (collides? arg-list arg-pair)
+	(define result #f)
+	; Check each body element to see if collides with given pair
+	(for ([i arg-list])
+		#:break (equal? result #t)
+		(when (equal? arg-pair i)
+			(set! result #t)))
+	; Return the resulting boolean
+	result)
 	; random-square: gets random square in grid
 (define (random-square)
 	(cons (random (+ 1 (car (grid-max)))) (random (cdr (grid-max)))))
@@ -87,6 +97,14 @@
 	(define dc-width (/ pix-width default-scale))
 	(define dc-height (/ pix-height default-scale))
 	(cons (- (/ dc-width square-size) 1) (- (/ dc-height square-size) 1)))
+	; onscreen?
+(define (onscreen? pair)
+	(define local-max (grid-max))
+	(define x (car pair))
+	(define y (cdr pair))
+	(define within-x-axis? (and (>= x 0) (<= x (car local-max))))
+	(define within-y-axis? (and (>= y 0) (<= y (cdr local-max))))
+	(and within-x-axis? within-y-axis?))
 	; remove-tail: Remove tail from l and return result
 (define (remove-tail l)
 	(cond
