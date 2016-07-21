@@ -5,42 +5,53 @@
 	"config.rkt"
 	"snake.rkt")
 
-; Variable declarations
-(define running? #t)
-(define fps 20)
-(define frame-time (/ 1000 fps))
-(define snake (new snake% [body-arg (list (cons 0 0))]))
-(define food (new food%))
-(define score 0)
+; Game class to manage all game operations
+(define game% (class object%
+	(define running? #t)
+	(define frame-time (/ 1000 fps))
+	(super-new)
+	; Public methods
+	(define/public (loop)
+		(thread (lambda () (let inner-loop ()
+			; Get start time for this loop iteration
+			(define start-time (current-inexact-milliseconds))
 
-(define render (lambda (dc)
-	(send dc clear)
-	(send dc set-scale 2 2)
-	(send snake draw dc)
-	(send food draw dc)
-	(draw-score dc)
-	(when (not running?)
-		(send dc draw-text "Game Over" 20 40))))
+			; Update, render
+			(update)
+			(render dc)
 
-(define (draw-score dc)
-	(define str-score (string-append "Score: " (number->string score)))
-	(send dc draw-text str-score 20 20))
+			; Determine amount of time passed
+			(define elapsed-time (- start-time (current-inexact-milliseconds)))
+			; Sleep if time left
+			(define sleep-time (/ (- frame-time elapsed-time) 1000))
+			(cond [(> sleep-time 0)
+				(sleep sleep-time)])
+			;Loop game
+			(when running?
+				(inner-loop))))))
+	(define/public (render dc)
+		(send dc clear)
+		(send dc set-scale 2 2)
+		(send snake draw dc)
+		(send food draw dc)
+		(draw-score dc)
+		(when (not running?)
+			(send dc draw-text "Game Over" 20 40)))
+	(define/public (update)
+		(send snake move)
+		(when (send snake eating? (send food get-body))
+			(send snake grow)
+			(send food move)
+			(set! score (+ score 1)))
+		(when (send snake dying?)
+			(game-over)))
+	; Private methods
+	(define/private (draw-score dc)
+		(define str-score (string-append "Score: " (number->string score)))
+		(send dc draw-text str-score 20 20))
+	(define/private (game-over)
+		(set! running? #f))))
 
-; Game logic: Update snake and food
-(define (update-game)
-	(send snake move)
-	(and debug? (printf "Food: ~v\n" (send food get-body)))
-	(and debug? (printf "Score: ~v\n" score))
-	(when (send snake eating? (send food get-body))
-		(send snake grow)
-		(send food move)
-		(set! score (+ score 1)))
-	(when (send snake dying?)
-		(game-over)))
-
-; game-over: end the game
-(define (game-over)
-	(set! running? #f))
 
 ; Define frame
 (define frame
@@ -50,7 +61,7 @@
 		[min-height (cdr window-size)]))
 
 ; Define custom canvas to handle input
-(define custom-canvas 
+(define custom-canvas%
 	(class canvas%
 		; Overrided method for mouse input
 		;(define/override (on-event event)
@@ -66,35 +77,20 @@
 		(super-new)))
 
 ; Create instance of custom canvas with paint-callback
-(define game-canvas (new custom-canvas
+(define game-canvas (new custom-canvas%
 	[parent frame]
 	[paint-callback (lambda (canvas dc)
-		(render dc))]))
+		(send game render dc))]))
 
+; Variable declarations
+(define snake (new snake% [body-arg (list (cons 0 0))]))
+(define food (new food%))
+(define score 0)
+(define game (new game%))
 (define dc (send game-canvas get-dc))
 
-
-; Main game loop
-(define game-thread (thread (lambda ()
-	(let loop ()
-		; Get time for start of this loop iteration
-		(define start-time (current-inexact-milliseconds))
-	
-		; Update, render
-		(update-game)
-		(render dc)
-	
-		; Determine amount of time passed
-		(define elapsed-time (- start-time (current-inexact-milliseconds)))
-		; Sleep if time left
-		(define sleep-time (/ (- frame-time elapsed-time ) 1000))
-		(cond [(> sleep-time 0)
-			(sleep sleep-time)
-			(and debug? (printf "Slept for ~v~n" sleep-time))])
-		; Loop game
-		(cond
-			[running? (loop)])))))
-
+; Begin game loop as separate thread
+(define game-thread (send game loop))
 
 ; Show the frame
 (send frame show #t)
